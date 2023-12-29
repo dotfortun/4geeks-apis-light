@@ -9,6 +9,7 @@ uvicorn = "0.25.0"
 slowapi = "0.1.8"
 sqlalchemy = "2.0.24"
 alembic = "1.13.1"
+sqlmodel = "*"
 
 [dev-packages]
 pipenv = "*"

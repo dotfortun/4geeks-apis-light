@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0fa0db021efe4622533554b3502178cb021b2e8e5206edcecf0203e37ffacf76"
+            "sha256": "e2230e4dd5fa18819721541a35f023cfd7f3e8b4baeda6ffc18ea434256efc3e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -452,6 +452,15 @@
             "markers": "python_version >= '3.7'",
             "version": "==2.0.24"
         },
+        "sqlmodel": {
+            "hashes": [
+                "sha256:0bff8fc94af86b44925aa813f56cf6aabdd7f156b73259f2f60692c6a64ac90e",
+                "sha256:accea3ff5d878e41ac439b11e78613ed61ce300cfcb860e87a2d73d4884cbee4"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7' and python_version < '4.0'",
+            "version": "==0.0.14"
+        },
         "starlette": {
             "hashes": [
                 "sha256:cd0cb10ddb49313f609cedfac62c8c12e56c7314b66d89bb077ba228bada1b09",
@@ -465,7 +474,7 @@
                 "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783",
                 "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"
             ],
-            "markers": "python_version < '3.11'",
+            "markers": "python_version >= '3.8'",
             "version": "==4.9.0"
         },
         "uvicorn": {
