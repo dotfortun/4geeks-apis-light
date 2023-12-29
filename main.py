@@ -3,7 +3,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from api.todo import todo_app
+from api.todo import app as todo_app
 
 app = FastAPI(
     title="4Geeks Playground",

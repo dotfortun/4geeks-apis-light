@@ -5,6 +5,23 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from db.database import Base
+
+import importlib
+import sys
+import os
+
+# This imports all models in the api folder.
+
+for api_mod in os.listdir("./api"):
+    name = f"api.{api_mod}"
+    if name in sys.modules:
+        pass
+    elif (spec := importlib.util.find_spec(name)) is not None:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -18,7 +35,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
