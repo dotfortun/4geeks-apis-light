@@ -5,6 +5,8 @@ from sqlmodel import (
 )
 from pydantic import BaseModel
 
+import sqlmodel
+
 
 class TodoUserBase(SQLModel):
     name: str = Field(
@@ -43,6 +45,7 @@ class TodoItem(TodoItemBase, table=True):
         default=None,
         primary_key=True
     )
+    label: str
     user: Optional["TodoUser"] = Relationship(back_populates="todos")
 
 
@@ -59,6 +62,7 @@ class TodoItemRead(TodoItemBase):
 class TodoItemUpdate(TodoItemBase):
     label: Optional[str]
     is_done: Optional[bool]
+    user_id: Optional[int]
 
 
 # Models with relationships
@@ -67,5 +71,11 @@ class TodoUserReadWithItems(TodoUserBase):
     todos: List["TodoItemRead"]
 
 
+# Group models
+
 class TodoUserList(BaseModel):
     users: List[TodoUserRead]
+
+
+class TodoItemList(BaseModel):
+    todos: List[TodoItem]
