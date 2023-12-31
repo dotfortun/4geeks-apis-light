@@ -18,6 +18,8 @@ for api_mod in os.listdir("./api"):
     name = f"api.{api_mod}"
     if name in sys.modules:
         pass
+    elif name.endswith(".py"):
+        pass
     elif (spec := importlib.util.find_spec(name)) is not None:
         module = importlib.util.module_from_spec(spec)
         sys.modules[name] = module
