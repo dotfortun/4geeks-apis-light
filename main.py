@@ -33,6 +33,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 async def app_root(request: Request):
     routes = ""
     for mod in api.__all__:
+        if re.search("pycache", mod.__name__):
+            continue
         name = re.sub("api\.", "", mod.__name__)
         routes += f"""<li><a href="/{name}/docs">{name.title()}</a></li>"""
     return HTMLResponse(
