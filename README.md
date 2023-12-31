@@ -37,3 +37,12 @@ Start the server
   pipenv run dev
 ```
 
+## Creating a new api
+
+To make a new api for the playground, run `pipenv run utils create <module name>`, and a boilerplate API module will be bootstrapped into the `api` folder.
+
+## Acknowledgements
+
+Thanks to [readme.so](https://readme.so) for this template.
+
+

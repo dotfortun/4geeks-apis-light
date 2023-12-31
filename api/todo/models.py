@@ -5,8 +5,6 @@ from sqlmodel import (
 )
 from pydantic import BaseModel
 
-import sqlmodel
-
 
 class TodoUserBase(SQLModel):
     name: str = Field(

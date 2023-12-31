@@ -10,14 +10,17 @@ slowapi = "0.1.8"
 sqlalchemy = "2.0.24"
 alembic = "1.13.1"
 sqlmodel = "*"
+fastapi-babel = "*"
 
 [dev-packages]
 pipenv = "*"
+autopep8 = "*"
 
 [requires]
 python_version = "3.10"
 
 [scripts]
 dev="uvicorn main:app --reload"
+utils="python utils.py"
 migrate="alembic revision --autogenerate"
 upgrade="alembic upgrade head"
