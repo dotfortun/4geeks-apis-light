@@ -18,6 +18,8 @@ app = FastAPI(
 )
 
 for mod in api.__all__:
+    if mod.__name__ == "__pycache__":
+        continue
     name = re.sub("api\.", "", mod.__name__)
     app.mount(f"""/{name}""", getattr(mod, "app"), name)
 
