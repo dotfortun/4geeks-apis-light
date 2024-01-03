@@ -6,6 +6,7 @@ from fastapi import (
     FastAPI, Request, Response, HTTPException,
     Query, Depends, Path, status,
 )
+from fastapi.openapi.docs import get_swagger_ui_html
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -24,13 +25,24 @@ from api.db import get_session
 
 
 app = FastAPI(
-    title="Todo API"
+    title="Todo API",
+    description="An API for storing Todo Lists.",
+    docs_url=None,
 )
 
 limiter = Limiter(key_func=get_remote_address)
 # Limiter requires the request to be in the args for your routes!
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        title="4Geeks Playground - Todo API",
+        openapi_url="/todo/openapi.json",
+        swagger_favicon_url="/favicon.ico"
+    )
 
 
 @app.post(

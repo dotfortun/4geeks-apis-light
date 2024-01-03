@@ -22,6 +22,7 @@ from fastapi import (
     FastAPI, Request, Response, HTTPException,
     Query, Depends, Path, status,
 )
+from fastapi.openapi.docs import get_swagger_ui_html
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -37,7 +38,9 @@ from api.{f_name}.models import (
 from api.db import get_session
 
 app = FastAPI(
-    title="{name.title()} API"
+    title="{name.title()} API",
+    description="An API that you should describe.",
+    docs_url=None,
 )
 
 limiter = Limiter(key_func=get_remote_address)
@@ -46,13 +49,22 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        title="4Geeks Playground - {name.title()} API",
+        openapi_url="/{f_name}/openapi.json",
+        swagger_favicon_url="/favicon.ico"
+    )
+
+
 @app.get(
     "/hello",
     response_model=HelloWorld,
     tags=["User operations"],
 )
 @limiter.limit("15/minute")
-def create_user(
+def hello_world(
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
@@ -98,18 +110,53 @@ class HelloWorld(HelloWorldBase, table=True):
     print(f"Module {name} already exists.")
 
 
+def reset_db():
+    confirm = input(
+        "Are you sure you want to reset your db and migrations? y/N\n"
+    )
+    if confirm.lower() not in ["y", "yes"]:
+        print("reset_db cancelled.")
+        return
+    for f_name in os.listdir("./migrations/versions"):
+        if f_name != ".gitkeep":
+            os.remove(f"./migrations/versions/{f_name}")
+            pass
+    db_name = os.getenv("DB_URL", "sqlite:///./playground.sqlite")
+    if re.match(r"sqlite\:", db_name):
+        db_name = re.sub(
+            r"(^sqlite|/\.|[\:\/])",
+            "",
+            db_name
+        )
+        os.remove(f"./{db_name}")
+    print("Database reset.")
+
+
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
+
 mod_parser = subparsers.add_parser("create", aliases=["make"])
 mod_parser.add_argument(
     "name",
     help="The name of the module you want to create.",
     type=str,
 )
-mod_parser.set_defaults(func=create_module)
+mod_parser.set_defaults(op="create_module", func=create_module)
+
+reset_parser = subparsers.add_parser(
+    "reset",
+    aliases=["drop", "dropdb", "resetdb"]
+)
+reset_parser.set_defaults(op="reset_db", func=reset_db)
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    if hasattr(args, 'func'):
-        args.func(args.name)
+
+    match getattr(args, "op", None):
+        case "create_module":
+            args.func(args.name)
+        case "reset_db":
+            args.func()
+        case _:
+            print("How did you even get here?")
