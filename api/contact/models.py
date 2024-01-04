@@ -1,15 +1,11 @@
-import re
-
 from typing import List, Optional
 
 from sqlmodel import (
     SQLModel, Field, Relationship,
 )
 from pydantic import (
-    BaseModel, ValidationInfo, field_validator
+    BaseModel
 )
-
-import sqlmodel
 
 
 class AgendaBase(SQLModel):
@@ -31,10 +27,6 @@ class Agenda(AgendaBase, table=True):
     contacts: List["Contact"] = Relationship(back_populates="agenda")
 
 
-class AgendaCreate(AgendaBase):
-    pass
-
-
 class AgendaRead(AgendaBase):
     id: int
     slug: str
@@ -53,23 +45,10 @@ class Contact(ContactBase, table=True):
         primary_key=True,
     )
 
-    user_id: int = Field(
+    agenda_id: int = Field(
         foreign_key="agenda.id"
     )
     agenda: Optional["Agenda"] = Relationship(back_populates="contacts")
-
-    @field_validator('phone')
-    @classmethod
-    def validate_phone(cls, v: str, info: ValidationInfo):
-        if isinstance(v, str):
-            is_valid = re.match(
-                # This regex matches pretty many valid
-                # phone numbers, and even more invalid ones.
-                r"^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$",
-                v
-            )
-            assert is_valid, f"{v} is not a valid phone number."
-        return v
 
 
 class ContactRead(ContactBase):

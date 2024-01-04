@@ -1,8 +1,8 @@
 """Contact list models done.
 
-Revision ID: af4c7662c9b9
+Revision ID: d797a17816df
 Revises: 
-Create Date: 2024-01-03 11:24:31.565507
+Create Date: 2024-01-04 08:35:24.846761
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'af4c7662c9b9'
+revision: str = 'd797a17816df'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,14 +34,13 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_todouser_name'), 'todouser', ['name'], unique=True)
     op.create_table('contact',
-    sa.Column('slug', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('phone', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('email', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('address', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['agenda.id'], ),
+    sa.Column('agenda_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['agenda_id'], ['agenda.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('todoitem',

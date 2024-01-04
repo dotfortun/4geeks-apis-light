@@ -4,7 +4,10 @@ from fastapi import (
     FastAPI, Request, Response, HTTPException,
     Query, Depends, Path, status,
 )
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
+from pydantic import ValidationError
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -15,7 +18,7 @@ from sqlmodel import (
 )
 
 from api.contact.models import (
-    Agenda, AgendaCreate, AgendaRead,
+    Agenda, AgendaRead,
     Contact, ContactCreate, ContactRead, ContactUpdate,
     AgendaList, ContactList, AgendaReadWithItems,
 )
@@ -31,6 +34,12 @@ limiter = Limiter(key_func=get_remote_address)
 # Limiter requires the request to be in the args for your routes!
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    print(f"OMG! The client sent invalid data!: {exc}")
+    return await request_validation_exception_handler(request, exc)
 
 
 @app.get("/docs", include_in_schema=False)
@@ -105,7 +114,7 @@ def create_agenda(
         return db_user
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="User already exists."
+        detail=f"""Agenda "{slug}" already exists."""
     )
 
 
@@ -135,27 +144,58 @@ def delete_agenda(
     )
 
 
+@app.get(
+    "/agendas/{slug}/contacts",
+    response_model=ContactList,
+    tags=["Contact operations"],
+)
+@limiter.limit("60/minute")
+def get_agenda_contacts(
+    request: Request,
+    slug: Annotated[str, Path(title="slug")],
+    session: Session = Depends(get_session)
+):
+    agenda = session.exec(select(Agenda).where(
+        Agenda.slug == slug)
+    ).first()
+    if agenda:
+        return ContactList(
+            contacts=agenda.contacts
+        )
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"""Agenda "{slug}" doesn't exist."""
+    )
+
+
 @app.post(
-    "/agendas/{slug}/contact",
+    "/agendas/{slug}/contacts",
     response_model=ContactRead,
     tags=["Contact operations"],
 )
 @limiter.limit("60/minute")
 def post_agenda_contact(
     request: Request,
+    slug: Annotated[str, Path(title="slug")],
     contact: ContactCreate,
     session: Session = Depends(get_session)
 ):
     agenda = session.exec(select(Agenda).where(
-        Agenda.slug == contact.slug)
+        Agenda.slug == slug)
     ).first()
     if agenda:
-        db_todo = Contact.model_validate(contact)
+        db_todo = Contact.model_validate({
+            "name": contact.name,
+            "phone": contact.phone,
+            "email": contact.email,
+            "address": contact.address,
+            "agenda_id": agenda.id,
+        })
         session.add(db_todo)
         session.commit()
         session.refresh(db_todo)
         return db_todo
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"User #{contact.user_id} doesn't exist."
+        detail=f"""Agenda "{slug}" doesn't exist."""
     )
