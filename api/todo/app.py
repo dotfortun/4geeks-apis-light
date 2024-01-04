@@ -46,26 +46,26 @@ async def swagger_ui_html():
 
 
 @app.post(
-    "/users/{username}",
+    "/users/{user_name}",
     status_code=status.HTTP_201_CREATED,
     response_model=TodoUserRead,
     tags=["User operations"],
 )
 @limiter.limit("15/minute")
 def create_user(
-    username: Annotated[str, Path(title="username")],
+    user_name: Annotated[str, Path(title="username")],
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
     user_exists = session.exec(select(TodoUser).where(
-        TodoUser.name == username)).first()
+        TodoUser.name == user_name)).first()
     if user_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already exists."
         )
     db_user = TodoUser.model_validate({
-        "username": username
+        "username": user_name
     })
     session.add(db_user)
     session.commit()
