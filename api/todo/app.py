@@ -46,29 +46,31 @@ async def swagger_ui_html():
 
 
 @app.post(
-    "/users",
+    "/users/{username}",
     status_code=status.HTTP_201_CREATED,
     response_model=TodoUserRead,
     tags=["User operations"],
 )
 @limiter.limit("15/minute")
 def create_user(
-    user: TodoUserCreate,
+    username: Annotated[str, Path(title="username")],
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
     user_exists = session.exec(select(TodoUser).where(
-        TodoUser.name == user.name)).first()
-    if not user_exists:
-        db_user = TodoUser.model_validate(user)
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
-        return db_user
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="User already exists."
-    )
+        TodoUser.name == username)).first()
+    if user_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists."
+        )
+    db_user = TodoUser.model_validate({
+        "username": username
+    })
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
 
 
 @app.delete(
@@ -85,15 +87,15 @@ def delete_user(
     user = session.exec(select(TodoUser).where(
         TodoUser.name == user_name)
     ).first()
-    if user:
-        session.delete(user)
-        session.commit()
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User {user_name} doesn't exist."
         )
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"User {user_name} doesn't exist."
+    session.delete(user)
+    session.commit()
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
     )
 
 
@@ -130,12 +132,12 @@ def get_user(
     user = session.exec(select(TodoUser).where(
         TodoUser.name == user_name)
     ).first()
-    if user:
-        return user
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"User {user_name} doesn't exist."
-    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {user_name} doesn't exist."
+        )
+    return user
 
 
 @app.post(
@@ -150,16 +152,16 @@ def post_user_todo(
     session: Session = Depends(get_session)
 ):
     user = session.get(TodoUser, todo_item.user_id)
-    if user:
-        db_todo = TodoItem.model_validate(todo_item)
-        session.add(db_todo)
-        session.commit()
-        session.refresh(db_todo)
-        return db_todo
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"User #{todo_item.user_id} doesn't exist."
-    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User #{todo_item.user_id} doesn't exist."
+        )
+    db_todo = TodoItem.model_validate(todo_item)
+    session.add(db_todo)
+    session.commit()
+    session.refresh(db_todo)
+    return db_todo
 
 
 @app.put(
@@ -175,17 +177,17 @@ def put_user_todo(
     session: Session = Depends(get_session)
 ):
     todo = session.get(TodoItem, todo_id)
-    if todo:
-        for k, v in todo_data:
-            setattr(todo, k, v)
-        session.add(todo)
-        session.commit()
-        session.refresh(todo)
-        return todo
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Todo #{todo_id} doesn't exist."
-    )
+    if not todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Todo #{todo_id} doesn't exist."
+        )
+    for k, v in todo_data:
+        setattr(todo, k, v)
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    return todo
 
 
 @app.delete(
@@ -195,17 +197,17 @@ def put_user_todo(
 @limiter.limit("120/minute")
 def delete_user_todo(
     request: Request,
-    todo_id: Annotated[int, Path(title="username")],
+    todo_id: Annotated[int, Path(title="todo id")],
     session: Session = Depends(get_session)
 ):
     todo = session.get(TodoItem, todo_id)
-    if todo:
-        session.delete(todo)
-        session.commit()
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT
+    if not todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Todo #{todo_id} doesn't exist."
         )
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Todo #{todo_id} doesn't exist."
+    session.delete(todo)
+    session.commit()
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
     )
