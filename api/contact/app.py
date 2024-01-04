@@ -199,3 +199,37 @@ def post_agenda_contact(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f"""Agenda "{slug}" doesn't exist."""
     )
+
+
+@app.put(
+    "/agendas/{slug}/contacts",
+    response_model=ContactRead,
+    tags=["Contact operations"],
+)
+@limiter.limit("60/minute")
+def get_agenda_contacts(
+    request: Request,
+    slug: Annotated[str, Path(title="slug")],
+    contact: ContactUpdate,
+    session: Session = Depends(get_session)
+):
+    db_contact = session.get(
+        Contact,
+        contact.id
+    )
+    if not db_contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Contact #{contact.id} doesn't exist."""
+        )
+    if db_contact and slug != db_contact.agenda.slug:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Contact #{contact.id} doesn't exist in Agenda "{slug}"."""
+        )
+    for k, v in contact:
+        setattr(db_contact, k, v)
+    session.add(db_contact)
+    session.commit()
+    session.refresh(db_contact)
+    return db_contact

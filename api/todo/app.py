@@ -164,7 +164,7 @@ def post_user_todo(
 
 @app.put(
     "/todos/{todo_id}",
-    response_model=TodoItem,
+    response_model=TodoItemRead,
     tags=["Todo operations"],
 )
 @limiter.limit("120/minute")
@@ -177,7 +177,7 @@ def put_user_todo(
     todo = session.get(TodoItem, todo_id)
     if todo:
         for k, v in todo_data:
-            todo[k] = v
+            setattr(todo, k, v)
         session.add(todo)
         session.commit()
         session.refresh(todo)

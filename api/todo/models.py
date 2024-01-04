@@ -33,9 +33,6 @@ class TodoUserRead(TodoUserBase):
 class TodoItemBase(SQLModel):
     label: str
     is_done: bool = Field(default=False)
-    user_id: int = Field(
-        foreign_key="todouser.id"
-    )
 
 
 class TodoItem(TodoItemBase, table=True):
@@ -44,6 +41,9 @@ class TodoItem(TodoItemBase, table=True):
         primary_key=True
     )
     label: str
+    user_id: int = Field(
+        foreign_key="todouser.id"
+    )
     user: Optional["TodoUser"] = Relationship(back_populates="todos")
 
 
@@ -60,7 +60,6 @@ class TodoItemRead(TodoItemBase):
 class TodoItemUpdate(TodoItemBase):
     label: Optional[str]
     is_done: Optional[bool]
-    user_id: Optional[int]
 
 
 # Models with relationships

@@ -1,8 +1,8 @@
 """Contact list models done.
 
-Revision ID: d797a17816df
+Revision ID: a5e2fedb1ee0
 Revises: 
-Create Date: 2024-01-04 08:35:24.846761
+Create Date: 2024-01-04 09:01:34.092147
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd797a17816df'
+revision: str = 'a5e2fedb1ee0'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -45,9 +45,9 @@ def upgrade() -> None:
     )
     op.create_table('todoitem',
     sa.Column('is_done', sa.Boolean(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('label', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['todouser.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

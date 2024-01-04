@@ -44,7 +44,6 @@ class Contact(ContactBase, table=True):
         default=None,
         primary_key=True,
     )
-
     agenda_id: int = Field(
         foreign_key="agenda.id"
     )
@@ -63,6 +62,7 @@ class ContactCreate(ContactBase):
 
 
 class ContactUpdate(ContactBase):
+    id: int
     name: Optional[str]
     phone: Optional[str]
     email: Optional[str]
