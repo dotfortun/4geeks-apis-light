@@ -222,7 +222,7 @@ def get_agenda_contacts(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"""Contact #{contact.id} doesn't exist."""
         )
-    if db_contact and slug != db_contact.agenda.slug:
+    if slug != db_contact.agenda.slug:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"""Contact #{contact.id} doesn't exist in Agenda "{slug}"."""
@@ -233,3 +233,32 @@ def get_agenda_contacts(
     session.commit()
     session.refresh(db_contact)
     return db_contact
+
+
+@app.delete(
+    "/agendas/{slug}/contacts/{contact_id}",
+    tags=["Contact operations"],
+)
+@limiter.limit("120/minute")
+def delete_agenda_contact(
+    request: Request,
+    slug: Annotated[str, Path(title="slug")],
+    contact_id: Annotated[int, Path(title="contact id")],
+    session: Session = Depends(get_session)
+):
+    db_contact = session.get(db_contact, contact_id)
+    if not db_contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Contact #{db_contact.id} doesn't exist."""
+        )
+    if db_contact.agenda.slug != slug:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Contact #{db_contact.id} doesn't exist in Agenda "{slug}"."""
+        )
+    session.delete(db_contact)
+    session.commit()
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
+    )
