@@ -47,7 +47,8 @@ async def swagger_ui_html():
     return get_swagger_ui_html(
         title="4Geeks Playground - Contact List API",
         openapi_url="/contact/openapi.json",
-        swagger_favicon_url="/favicon.ico"
+        swagger_favicon_url="/favicon.ico",
+        swagger_css_url="/static/swagger-ui.css",
     )
 
 
