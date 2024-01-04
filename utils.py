@@ -33,7 +33,7 @@ from sqlmodel import (
 )
 
 from api.{f_name}.models import (
-    HelloWorld
+    HelloWorldRead
 )
 from api.db import get_session
 
@@ -54,13 +54,14 @@ async def swagger_ui_html():
     return get_swagger_ui_html(
         title="4Geeks Playground - {name.title()} API",
         openapi_url="/{f_name}/openapi.json",
-        swagger_favicon_url="/favicon.ico"
+        swagger_favicon_url="/favicon.ico",
+        swagger_css_url="/static/swagger-ui.css",
     )
 
 
 @app.get(
-    "/hello",
-    response_model=HelloWorld,
+    "/hello/",
+    response_model=HelloWorldRead,
     tags=["User operations"],
 )
 @limiter.limit("15/minute")
@@ -68,7 +69,7 @@ def hello_world(
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
-    hello_world = HelloWorld(message="Hello, world!")
+    hello_world = HelloWorldRead(message="Hello, world!")
     return hello_world
 
 """
@@ -95,6 +96,9 @@ class HelloWorld(HelloWorldBase, table=True):
         default=None,
         primary_key=True,
     )
+
+class HelloWorldRead(HelloWorldBase):
+    pass
 
 """
     if f_name not in os.listdir("./api"):
