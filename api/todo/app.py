@@ -17,9 +17,9 @@ from sqlmodel import (
 )
 
 from .models import (
-    TodoUser, TodoUserCreate, TodoUserRead, TodoUserReadWithItems,
+    TodoUser, TodoUserRead, TodoUserReadWithItems,
     TodoItem, TodoItemCreate, TodoItemRead, TodoItemUpdate,
-    TodoUserList, TodoItemList
+    TodoUserList
 )
 from api.db import get_session
 

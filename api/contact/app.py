@@ -55,6 +55,7 @@ async def swagger_ui_html():
     "/agendas",
     response_model=AgendaList,
     tags=["Agenda operations"],
+    summary="Get All Agendas.",
 )
 @limiter.limit("120/minute")
 def get_agendas(
