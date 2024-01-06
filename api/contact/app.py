@@ -38,7 +38,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    print(f"OMG! The client sent invalid data!: {exc}")
     return await request_validation_exception_handler(request, exc)
 
 
@@ -48,7 +47,7 @@ async def swagger_ui_html():
         title="4Geeks Playground - Contact List API",
         openapi_url="/contact/openapi.json",
         swagger_favicon_url="/favicon.ico",
-        swagger_css_url="/static/swagger-ui.css",
+        # swagger_css_url="/static/swagger-ui.css",
     )
 
 

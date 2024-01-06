@@ -42,7 +42,7 @@ async def swagger_ui_html():
         title="4Geeks Playground - Todo API",
         openapi_url="/todo/openapi.json",
         swagger_favicon_url="/favicon.ico",
-        swagger_css_url="/static/swagger-ui.css",
+        # swagger_css_url="/static/swagger-ui.css",
     )
 
 
