@@ -66,7 +66,7 @@ def create_user(
             detail="User already exists."
         )
     db_user = TodoUser.model_validate({
-        "username": user_name
+        "name": user_name
     })
     session.add(db_user)
     session.commit()
