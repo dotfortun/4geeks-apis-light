@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from sqlmodel import (
     SQLModel, Field, Relationship,
@@ -37,9 +37,9 @@ class AgendaRead(AgendaBase):
 
 class ContactBase(SQLModel):
     name: str
-    phone: Optional[str]
-    email: Optional[str]
-    address: Optional[str]
+    phone: Optional[str] = Field(default="")
+    email: Optional[str] = Field(default="")
+    address: Optional[str] = Field(default="")
 
 
 class Contact(ContactBase, table=True):
@@ -55,21 +55,24 @@ class Contact(ContactBase, table=True):
 
 class ContactRead(ContactBase):
     id: int
+    name: str
+    phone: str
+    email: str
+    address: str
 
 
 class ContactCreate(ContactBase):
     name: str = Field(nullable=False)
-    phone: Optional[str]
-    email: Optional[str]
-    address: Optional[str]
+    phone: Optional[str] = Field(default="")
+    email: Optional[str] = Field(default="")
+    address: Optional[str] = Field(default="")
 
 
 class ContactUpdate(ContactBase):
-    id: int
-    name: Optional[str]
-    phone: Optional[str]
-    email: Optional[str]
-    address: Optional[str]
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
 
 
 # Models with relationships

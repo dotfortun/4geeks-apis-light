@@ -172,6 +172,7 @@ def get_agenda_contacts(
 @app.post(
     "/agendas/{slug}/contacts",
     response_model=ContactRead,
+    status_code=status.HTTP_201_CREATED,
     tags=["Contact operations"],
 )
 @limiter.limit("60/minute")
@@ -185,17 +186,17 @@ def post_agenda_contact(
         Agenda.slug == slug)
     ).first()
     if agenda:
-        db_todo = Contact.model_validate({
+        db_contact = Contact.model_validate({
             "name": contact.name,
-            "phone": contact.phone,
-            "email": contact.email,
-            "address": contact.address,
+            "phone": contact.phone or "",
+            "email": contact.email or "",
+            "address": contact.address or "",
             "agenda_id": agenda.id,
         })
-        session.add(db_todo)
+        session.add(db_contact)
         session.commit()
-        session.refresh(db_todo)
-        return db_todo
+        session.refresh(db_contact)
+        return db_contact
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f"""Agenda "{slug}" doesn't exist."""
@@ -203,7 +204,7 @@ def post_agenda_contact(
 
 
 @app.put(
-    "/agendas/{slug}/contacts",
+    "/agendas/{slug}/contacts/{contact_id}",
     response_model=ContactRead,
     tags=["Contact operations"],
 )
@@ -211,12 +212,13 @@ def post_agenda_contact(
 def get_agenda_contacts(
     request: Request,
     slug: Annotated[str, Path(title="slug")],
+    contact_id: Annotated[int, Path(title="contact id")],
     contact: ContactUpdate,
     session: Session = Depends(get_session)
 ):
     db_contact = session.get(
         Contact,
-        contact.id
+        contact_id
     )
     if not db_contact:
         raise HTTPException(
@@ -229,7 +231,8 @@ def get_agenda_contacts(
             detail=f"""Contact #{contact.id} doesn't exist in Agenda "{slug}"."""
         )
     for k, v in contact:
-        setattr(db_contact, k, v)
+        if v is not None:
+            setattr(db_contact, k, v)
     session.add(db_contact)
     session.commit()
     session.refresh(db_contact)
@@ -247,7 +250,7 @@ def delete_agenda_contact(
     contact_id: Annotated[int, Path(title="contact id")],
     session: Session = Depends(get_session)
 ):
-    db_contact = session.get(db_contact, contact_id)
+    db_contact = session.get(Contact, contact_id)
     if not db_contact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
