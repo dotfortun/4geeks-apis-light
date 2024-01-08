@@ -1,8 +1,8 @@
-"""empty message
+"""Fixing db deletes
 
-Revision ID: 4c587df7c4a0
+Revision ID: f38d7f9dbd46
 Revises: 
-Create Date: 2024-01-08 13:19:33.901183
+Create Date: 2024-01-08 12:30:37.770139
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4c587df7c4a0'
+revision: str = 'f38d7f9dbd46'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
