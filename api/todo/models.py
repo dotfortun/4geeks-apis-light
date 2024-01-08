@@ -58,8 +58,8 @@ class TodoItemRead(TodoItemBase):
 
 
 class TodoItemUpdate(TodoItemBase):
-    label: Optional[str]
-    is_done: Optional[bool]
+    label: Optional[str] = None
+    is_done: Optional[bool] = None
 
 
 # Models with relationships

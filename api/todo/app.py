@@ -191,7 +191,8 @@ def put_user_todo(
             detail=f"Todo #{todo_id} doesn't exist."
         )
     for k, v in todo_data:
-        setattr(todo, k, v)
+        if v is not None:
+            setattr(todo, k, v)
     session.add(todo)
     session.commit()
     session.refresh(todo)
