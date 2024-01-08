@@ -18,7 +18,10 @@ class TodoUser(TodoUserBase, table=True):
         default=None,
         primary_key=True,
     )
-    todos: List["TodoItem"] = Relationship(back_populates="user")
+    todos: List["TodoItem"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "delete"}
+    )
 
 
 class TodoUserCreate(TodoUserBase):
