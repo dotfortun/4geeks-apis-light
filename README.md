@@ -22,7 +22,7 @@ Go to the project directory
 Install dependencies
 
 ```bash
-  pipenv install
+  pipenv install --dev
 ```
 
 Copy `.env.example` to `.env`
@@ -40,6 +40,19 @@ Start the server
 ## Creating a new api
 
 To make a new api for the playground, run `pipenv run utils create <module name>`, and a boilerplate API module will be bootstrapped into the `api` folder.
+
+
+## Reset your database
+
+```bash
+  pipenv run utils drop
+```
+
+## Testing
+
+```bash
+  pipenv run test
+```
 
 ## Acknowledgements
 
