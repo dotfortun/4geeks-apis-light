@@ -142,23 +142,29 @@ def get_user(
 
 
 @app.post(
-    "/todos",
+    "/todos/{user_name}",
     response_model=TodoItemCreate,
     tags=["Todo operations"],
 )
 @limiter.limit("60/minute")
 def post_user_todo(
     request: Request,
+    user_name: Annotated[str, Path(title="username")],
     todo_item: TodoItemCreate,
     session: Session = Depends(get_session)
 ):
-    user = session.get(TodoUser, todo_item.user_id)
+    user = session.exec(select(TodoUser).where(
+        TodoUser.name == user_name)
+    ).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User #{todo_item.user_id} doesn't exist."
+            detail=f"""User "{user_name}" doesn't exist."""
         )
-    db_todo = TodoItem.model_validate(todo_item)
+    db_todo = TodoItem.model_validate({
+        **todo_item.model_dump(),
+        "user_id": user.id
+    })
     session.add(db_todo)
     session.commit()
     session.refresh(db_todo)
