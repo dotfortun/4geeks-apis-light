@@ -78,7 +78,6 @@ def test_post_todos(session: Session, client: TestClient):
         }
     )
     data = resp.json()
-    print(data)
 
     sombra = session.exec(select(TodoUser).where(
         TodoUser.name == "sombra")
@@ -89,3 +88,103 @@ def test_post_todos(session: Session, client: TestClient):
     assert data["label"] == "Meow for food at 6 AM"
     assert data["is_done"] == True
     assert data["id"] is not None
+
+
+def test_put_todos(session: Session, client: TestClient):
+    sombra = TodoUser(name="sombra")
+    session.add(sombra)
+    session.commit()
+    session.refresh(sombra)
+    todo = TodoItem(
+        label="Hello, world!",
+        is_done=False,
+        user_id=sombra.id
+    )
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    session.refresh(sombra)
+
+    resp = client.put(
+        f"/todos/{todo.id}",
+        json={
+            "label": "Meow for food at 6 AM",
+            "is_done": True
+        }
+    )
+    data = resp.json()
+
+    todo = session.get(TodoItem, todo.id)
+
+    assert resp.status_code == 200
+    assert data["label"] == "Meow for food at 6 AM"
+    assert data["is_done"] == True
+    assert data["id"] == todo.id
+
+
+def test_delete_todos(session: Session, client: TestClient):
+    sombra = TodoUser(name="sombra")
+    session.add(sombra)
+    session.commit()
+    session.refresh(sombra)
+    todo = TodoItem(
+        label="Hello, world!",
+        is_done=False,
+        user_id=sombra.id
+    )
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    session.refresh(sombra)
+
+    resp = client.delete(
+        f"/todos/{todo.id}"
+    )
+
+    todo = session.get(TodoItem, todo.id)
+
+    assert resp.status_code == 204
+    assert todo is None
+
+
+def test_delete_user(session: Session, client: TestClient):
+    sombra = TodoUser(name="sombra")
+    session.add(sombra)
+    session.commit()
+    session.refresh(sombra)
+    todo = TodoItem(
+        label="Hello, world!",
+        is_done=False,
+        user_id=sombra.id
+    )
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    session.refresh(sombra)
+
+    grizelle = TodoUser(name="grizelle")
+    session.add(grizelle)
+    session.commit()
+    session.refresh(grizelle)
+    todo = TodoItem(
+        label="Hello, world!",
+        is_done=False,
+        user_id=grizelle.id
+    )
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    session.refresh(grizelle)
+
+    resp = client.delete(
+        "/users/sombra"
+    )
+
+    sombra = session.get(TodoUser, sombra.id)
+    todos = session.exec(select(TodoItem)).all()
+    users = session.exec(select(TodoUser)).all()
+
+    assert resp.status_code == 204
+    assert sombra is None
+    assert len(todos) == 1
+    assert len(users) == 1

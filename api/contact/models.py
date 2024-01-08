@@ -24,7 +24,10 @@ class Agenda(AgendaBase, table=True):
         index=True,
         unique=True,
     )
-    contacts: List["Contact"] = Relationship(back_populates="agenda")
+    contacts: List["Contact"] = Relationship(
+        back_populates="agenda",
+        sa_relationship_kwargs={"cascade": "delete"}
+    )
 
 
 class AgendaRead(AgendaBase):
