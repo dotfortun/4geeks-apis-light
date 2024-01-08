@@ -144,6 +144,7 @@ def get_user(
 @app.post(
     "/todos/{user_name}",
     response_model=TodoItemCreate,
+    status_code=status.HTTP_201_CREATED,
     tags=["Todo operations"],
 )
 @limiter.limit("60/minute")
