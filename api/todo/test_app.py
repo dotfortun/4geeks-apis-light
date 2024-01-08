@@ -88,3 +88,4 @@ def test_post_todos(session: Session, client: TestClient):
     assert len(sombra.todos) == 1
     assert data["label"] == "Meow for food at 6 AM"
     assert data["is_done"] == True
+    assert data["id"] is not None

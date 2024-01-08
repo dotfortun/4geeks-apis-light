@@ -143,7 +143,7 @@ def get_user(
 
 @app.post(
     "/todos/{user_name}",
-    response_model=TodoItemCreate,
+    response_model=TodoItemRead,
     status_code=status.HTTP_201_CREATED,
     tags=["Todo operations"],
 )
