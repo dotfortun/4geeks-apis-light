@@ -55,7 +55,6 @@ async def swagger_ui_html():
         title="4Geeks Playground - {name.title()} API",
         openapi_url="/{f_name}/openapi.json",
         swagger_favicon_url="/favicon.ico",
-        swagger_css_url="/static/swagger-ui.css",
     )
 
 
