@@ -36,7 +36,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.mount("/files", StaticFiles(directory="api/sound/files"), name="files")
 
 data = {
-    "fx": None,
+    "sound_effects": None,
     "songs": None,
 }
 
@@ -44,7 +44,7 @@ with (
     open("api/sound/data/fx.json", "rt") as fx_file,
     open("api/sound/data/songs.json", "rt") as song_file
 ):
-    data["fx"] = json.load(fx_file)
+    data["sound_effects"] = json.load(fx_file)
     data["songs"] = json.load(song_file)
 
 
@@ -63,7 +63,7 @@ async def swagger_ui_html():
 )
 def get_all_fx():
     return {
-        "sound_effects": data["fx"]
+        "sound_effects": data["sound_effects"]
     }
 
 
