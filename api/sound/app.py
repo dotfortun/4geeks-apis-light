@@ -79,6 +79,7 @@ def get_all_music():
 
 @app.get(
     "/all",
+    response_model=SoundData
 )
 @limiter.limit("15/minute")
 def get_all_data(
