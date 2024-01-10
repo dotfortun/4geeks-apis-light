@@ -81,7 +81,7 @@ def get_all_music():
     "/all",
 )
 @limiter.limit("15/minute")
-def hello_world(
+def get_all_data(
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
