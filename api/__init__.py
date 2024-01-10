@@ -5,14 +5,13 @@ import importlib
 
 __all__ = []
 
-for file in os.listdir(os.path.dirname(__file__)):
-    if re.search(f"\.py", file):
+for item in os.listdir(os.path.dirname(__file__)):
+    if re.search(f"\.py", item):
         continue
-    mod_name = f"api.{file}"
+    mod_name = f"api.{item}"
     if mod_name in sys.modules:
         pass
     elif (spec := importlib.util.find_spec(mod_name)) is not None:
-        # If you chose to perform the actual import ...
         module = importlib.util.module_from_spec(spec)
         sys.modules[mod_name] = module
         spec.loader.exec_module(module)

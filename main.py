@@ -39,9 +39,14 @@ async def app_root(request: Request):
         if re.search("pycache", mod.__name__):
             continue
         name = re.sub("api\.", "", mod.__name__)
-        routes += f"""<li><a href="/{name}/docs">{name.title()}</a></li>"""
+        mod_app = getattr(mod, "app", dict())
+        routes += f"""<li><a href="/{getattr(mod_app, "title", "").capitalize()}/docs">{name.title()}</a> - {getattr(mod_app, "description", "")}</li>"""
     return HTMLResponse(
-        content=re.sub(r"{{ content }}", f"<ul>{routes}</ul>", template)
+        content=re.sub(
+            r"{{ content }}",
+            f"{routes}",
+            template
+        )
     )
 
 

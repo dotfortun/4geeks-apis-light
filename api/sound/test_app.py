@@ -1,4 +1,7 @@
 import pytest
+import json
+import os
+
 from fastapi.testclient import TestClient
 from sqlmodel import (
     Session, SQLModel, create_engine
@@ -30,11 +33,21 @@ def client_fixture(session: Session):
     app.dependency_overrides.clear()
 
 
-# def test_hello_world(client: TestClient):
-#     response = client.get(
-#         "/hello"
-#     )
-#     data = response.json()
+def test_files_exist(client: TestClient):
+    data = {
+        "sound_effects": None,
+        "songs": None,
+    }
 
-#     assert response.status_code == 200
-#     assert data["message"] == "Hello, world!"
+    with (
+        open("api/sound/data/fx.json", "rt") as fx_file,
+        open("api/sound/data/songs.json", "rt") as song_file
+    ):
+        data["sound_effects"] = json.load(fx_file)
+        data["songs"] = json.load(song_file)
+
+    for song in data["sound_effects"]:
+        assert os.path.isfile(f"""api/{song["url"]}""")
+
+    for song in data["songs"]:
+        assert os.path.isfile(f"""api/{song["url"]}""")
