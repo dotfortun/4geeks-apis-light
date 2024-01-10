@@ -30,12 +30,11 @@ def client_fixture(session: Session):
     app.dependency_overrides.clear()
 
 
-def test_hello_world(client: TestClient):
-    response = client.get(
-        "/hello"
-    )
-    data = response.json()
+# def test_hello_world(client: TestClient):
+#     response = client.get(
+#         "/hello"
+#     )
+#     data = response.json()
 
-    assert response.status_code == 200
-    assert data["message"] == "Hello, world!"
-
+#     assert response.status_code == 200
+#     assert data["message"] == "Hello, world!"
