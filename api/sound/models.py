@@ -13,7 +13,7 @@ class Sound(BaseModel):
 
 
 class FX(Sound):
-    game: str
+    category: str
 
 
 class Song(Sound):
