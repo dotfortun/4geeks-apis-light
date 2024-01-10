@@ -25,7 +25,7 @@ from api.db import get_session
 
 app = FastAPI(
     title="Sound API",
-    description="An API that you should describe.",
+    description="An API serving sound files.",
     docs_url=None,
 )
 

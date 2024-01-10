@@ -10,10 +10,6 @@ from slowapi.errors import RateLimitExceeded
 
 import api
 
-template = None
-with open("./static/index.html", "r") as f:
-    template = f.read()
-
 
 app = FastAPI(
     title="4Geeks Playground",
@@ -34,12 +30,17 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.get("/", include_in_schema=False)
 async def app_root(request: Request):
+    template = None
+    with open("./static/index.html", "r") as f:
+        template = f.read()
+
     routes = ""
     for mod in api.__all__:
         if re.search("pycache", mod.__name__):
             continue
         name = re.sub("api\.", "", mod.__name__)
-        routes += f"""<li><a href="/{name}/docs">{name.title()}</a></li>"""
+        mod_app = getattr(mod, "app", dict())
+        routes += f"""<li><a href="/{getattr(mod_app, "title", "").capitalize()}/docs">{name.title()}</a> - {getattr(mod_app, "description", "")}</li>"""
     return HTMLResponse(
         content=re.sub(r"{{ content }}", f"<ul>{routes}</ul>", template)
     )
