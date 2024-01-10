@@ -1,115 +1,115 @@
 [
   {
     "id": 1,
-    "category": "game",
+    "category": "category",
     "name": "Mario Castle",
     "url": "/sound/files/mario/songs/castle.mp3"
   },
   {
     "id": 2,
-    "category": "game",
+    "category": "category",
     "name": "Mario Star",
     "url": "/sound/files/mario/songs/hurry-starman.mp3"
   },
   {
     "id": 3,
-    "category": "game",
+    "category": "category",
     "name": "Mario Overworld",
     "url": "/sound/files/mario/songs/overworld.mp3"
   },
   {
     "id": 4,
-    "category": "game",
+    "category": "category",
     "name": "Mario Stage 1",
     "url": "/sound/files/mario/songs/stage1.mp3"
   },
   {
     "id": 5,
-    "category": "game",
+    "category": "category",
     "name": "Mario Stage 2",
     "url": "/sound/files/mario/songs/stage2.mp3"
   },
   {
     "id": 6,
-    "category": "game",
+    "category": "category",
     "name": "Mario Star",
     "url": "/sound/files/mario/songs/starman.mp3"
   },
   {
     "id": 7,
-    "category": "game",
+    "category": "category",
     "name": "Mario Underworld",
     "url": "/sound/files/mario/songs/underworld.mp3"
   },
   {
     "id": 8,
-    "category": "game",
+    "category": "category",
     "name": "Mario Underwater",
     "url": "/sound/files/mario/songs/underwater.mp3"
   },
   {
     "id": 9,
-    "category": "game",
+    "category": "category",
     "name": "Zelda Castle",
     "url": "/sound/files/videogame/songs/zelda_castle.mp3"
   },
   {
     "id": 10,
-    "category": "game",
+    "category": "category",
     "name": "Zelda Outworld",
     "url": "/sound/files/videogame/songs/zelda_outworld.mp3"
   },
   {
     "id": 11,
-    "category": "game",
+    "category": "category",
     "name": "Zelda Titles",
     "url": "/sound/files/videogame/songs/zelda_title.mp3"
   },
   {
     "id": 12,
-    "category": "game",
+    "category": "category",
     "name": "Sonic Brain Zone",
     "url": "/sound/files/videogame/songs/sonic_brain-zone.mp3"
   },
   {
     "id": 13,
-    "category": "game",
+    "category": "category",
     "name": "Zelda Link To Past",
     "url": "/sound/files/videogame/songs/zelda_link-to-past.mp3"
   },
   {
     "id": 14,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "Flintstones",
     "url": "/sound/files/cartoons/songs/flintstones.mp3"
   },
   {
     "id": 15,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "power-rangers",
     "url": "/sound/files/cartoons/songs/power-rangers.mp3"
   },
   {
     "id": 16,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "simpsons",
     "url": "/sound/files/cartoons/songs/simpsons.mp3"
   },
   {
     "id": 17,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "south-park",
     "url": "/sound/files/cartoons/songs/south-park.mp3"
   },
   {
     "id": 18,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "thundercats",
     "url": "/sound/files/cartoons/songs/thundercats.mp3"
   },
   {
     "id": 19,
-    "game": "cartoon",
+    "category": "cartoon",
     "name": "x-men",
     "url": "/sound/files/cartoons/songs/x-men.mp3"
   }
