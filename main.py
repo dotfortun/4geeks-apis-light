@@ -3,6 +3,7 @@ import re
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -19,11 +20,20 @@ app = FastAPI(
     title="4Geeks Playground",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+)
+
 for mod in api.__all__:
     if re.search("pycache", mod.__name__):
         continue
     name = re.sub("api\.", "", mod.__name__)
-    app.mount(f"""/{name}""", getattr(mod, "app"), name)
+    subapp: FastAPI = getattr(mod, "app")
+    subapp.contact = {
+        "email": "info@4geeks.com"
+    }
+    app.mount(f"""/{name}""", subapp, name)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

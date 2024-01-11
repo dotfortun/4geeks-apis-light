@@ -28,6 +28,16 @@ app = FastAPI(
     title="Contact List API",
     description="An API for storing contacts.",
     docs_url=None,
+    openapi_tags=[
+        {
+            "name": "Agenda operations",
+            "description": "Operations on Agendas.",
+        },
+        {
+            "name": "Contact operations",
+            "description": "Operations on Contacts.",
+        }
+    ]
 )
 
 limiter = Limiter(key_func=get_remote_address)
@@ -56,9 +66,10 @@ async def swagger_ui_html():
     response_model=AgendaList,
     tags=["Agenda operations"],
     summary="Get All Agendas.",
+    description="Gets all Agendas from the database.",
 )
 @limiter.limit("120/minute")
-def get_agendas(
+def read_agendas(
     request: Request,
     offset: int = 0,
     limit: int = Query(default=100, le=100),
@@ -75,6 +86,8 @@ def get_agendas(
     "/agendas/{slug}",
     response_model=AgendaReadWithItems,
     tags=["Agenda operations"],
+    summary="Get Single Agenda.",
+    description="Gets a specific Agenda from the database.",
 )
 @limiter.limit("120/minute")
 def read_agenda(
@@ -98,6 +111,8 @@ def read_agenda(
     status_code=status.HTTP_201_CREATED,
     response_model=AgendaRead,
     tags=["Agenda operations"],
+    summary="Create Agenda.",
+    description="Creates an Agenda in the database.",
 )
 @limiter.limit("15/minute")
 def create_agenda(
@@ -122,6 +137,8 @@ def create_agenda(
 @app.delete(
     "/agendas/{slug}",
     tags=["Agenda operations"],
+    summary="Delete Agenda.",
+    description="Deletes a specific Agenda from the database.",
 )
 @limiter.limit("15/minute")
 def delete_agenda(
@@ -129,6 +146,8 @@ def delete_agenda(
     slug: Annotated[str, Path(title="slug")],
     session: Session = Depends(get_session),
     tags=["Agenda operations"],
+    summary="Delete Agenda.",
+    description="Deletes a specific agenda from the database.",
 ):
     user = session.exec(select(Agenda).where(
         Agenda.slug == slug)
@@ -149,6 +168,8 @@ def delete_agenda(
     "/agendas/{slug}/contacts",
     response_model=ContactList,
     tags=["Contact operations"],
+    summary="Get Agenda Contacts.",
+    description="Gets the contacts from a specific agenda from the database.",
 )
 @limiter.limit("60/minute")
 def read_agenda_contacts(
@@ -174,6 +195,8 @@ def read_agenda_contacts(
     response_model=ContactRead,
     status_code=status.HTTP_201_CREATED,
     tags=["Contact operations"],
+    summary="Create Agenda Contact.",
+    description="Creates a Contact for an Agenda.",
 )
 @limiter.limit("60/minute")
 def create_agenda_contact(
@@ -207,6 +230,8 @@ def create_agenda_contact(
     "/agendas/{slug}/contacts/{contact_id}",
     response_model=ContactRead,
     tags=["Contact operations"],
+    summary="Update Agenda Contact.",
+    description="Atomically (piece-by-piece) updates a Contact on an Agenda.",
 )
 @limiter.limit("60/minute")
 def update_agenda_contact(
@@ -242,6 +267,8 @@ def update_agenda_contact(
 @app.delete(
     "/agendas/{slug}/contacts/{contact_id}",
     tags=["Contact operations"],
+    summary="Delete Agenda Contact.",
+    description="Deletes a specific Contact on an Agenda.",
 )
 @limiter.limit("120/minute")
 def delete_agenda_contact(
