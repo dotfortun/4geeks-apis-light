@@ -106,7 +106,7 @@ def delete_user(
     tags=["User operations"],
 )
 @limiter.limit("120/minute")
-def get_users(
+def read_users(
     request: Request,
     offset: int = 0,
     limit: int = Query(default=100, le=100),
@@ -125,7 +125,7 @@ def get_users(
     tags=["User operations"],
 )
 @limiter.limit("120/minute")
-def get_user(
+def read_user(
     request: Request,
     user_name: Annotated[str, Path(title="username")],
     session: Session = Depends(get_session)
@@ -148,7 +148,7 @@ def get_user(
     tags=["Todo operations"],
 )
 @limiter.limit("60/minute")
-def post_user_todo(
+def create_user_todo(
     request: Request,
     user_name: Annotated[str, Path(title="username")],
     todo_item: TodoItemCreate,
@@ -178,7 +178,7 @@ def post_user_todo(
     tags=["Todo operations"],
 )
 @limiter.limit("120/minute")
-def put_user_todo(
+def update_user_todo(
     request: Request,
     todo_id: Annotated[int, Path(title="username")],
     todo_data: TodoItemUpdate,

@@ -77,7 +77,7 @@ def get_agendas(
     tags=["Agenda operations"],
 )
 @limiter.limit("120/minute")
-def get_agenda(
+def read_agenda(
     request: Request,
     slug: Annotated[str, Path(title="slug")],
     session: Session = Depends(get_session)
@@ -107,16 +107,16 @@ def create_agenda(
 ) -> None:
     user_exists = session.exec(select(Agenda).where(
         Agenda.slug == slug)).first()
-    if not user_exists:
-        db_user = Agenda(slug=slug)
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
-        return db_user
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"""Agenda "{slug}" already exists."""
-    )
+    if user_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"""Agenda "{slug}" already exists."""
+        )
+    db_user = Agenda(slug=slug)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
 
 
 @app.delete(
@@ -133,15 +133,15 @@ def delete_agenda(
     user = session.exec(select(Agenda).where(
         Agenda.slug == slug)
     ).first()
-    if user:
-        session.delete(user)
-        session.commit()
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"""Agenda "{slug}" doesn't exist."""
         )
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"""Agenda "{slug}" doesn't exist."""
+    session.delete(user)
+    session.commit()
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
     )
 
 
@@ -151,7 +151,7 @@ def delete_agenda(
     tags=["Contact operations"],
 )
 @limiter.limit("60/minute")
-def get_agenda_contacts(
+def read_agenda_contacts(
     request: Request,
     slug: Annotated[str, Path(title="slug")],
     session: Session = Depends(get_session)
@@ -159,13 +159,13 @@ def get_agenda_contacts(
     agenda = session.exec(select(Agenda).where(
         Agenda.slug == slug)
     ).first()
-    if agenda:
-        return ContactList(
-            contacts=agenda.contacts
+    if not agenda:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Agenda "{slug}" doesn't exist."""
         )
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"""Agenda "{slug}" doesn't exist."""
+    return ContactList(
+        contacts=agenda.contacts
     )
 
 
@@ -176,7 +176,7 @@ def get_agenda_contacts(
     tags=["Contact operations"],
 )
 @limiter.limit("60/minute")
-def post_agenda_contact(
+def create_agenda_contact(
     request: Request,
     slug: Annotated[str, Path(title="slug")],
     contact: ContactCreate,
@@ -185,22 +185,22 @@ def post_agenda_contact(
     agenda = session.exec(select(Agenda).where(
         Agenda.slug == slug)
     ).first()
-    if agenda:
-        db_contact = Contact.model_validate({
-            "name": contact.name,
-            "phone": contact.phone or "",
-            "email": contact.email or "",
-            "address": contact.address or "",
-            "agenda_id": agenda.id,
-        })
-        session.add(db_contact)
-        session.commit()
-        session.refresh(db_contact)
-        return db_contact
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"""Agenda "{slug}" doesn't exist."""
-    )
+    if not agenda:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Agenda "{slug}" doesn't exist."""
+        )
+    db_contact = Contact.model_validate({
+        "name": contact.name,
+        "phone": contact.phone or "",
+        "email": contact.email or "",
+        "address": contact.address or "",
+        "agenda_id": agenda.id,
+    })
+    session.add(db_contact)
+    session.commit()
+    session.refresh(db_contact)
+    return db_contact
 
 
 @app.put(
@@ -209,7 +209,7 @@ def post_agenda_contact(
     tags=["Contact operations"],
 )
 @limiter.limit("60/minute")
-def get_agenda_contacts(
+def update_agenda_contact(
     request: Request,
     slug: Annotated[str, Path(title="slug")],
     contact_id: Annotated[int, Path(title="contact id")],
