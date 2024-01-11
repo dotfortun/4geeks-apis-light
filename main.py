@@ -40,7 +40,7 @@ async def app_root(request: Request):
             continue
         name = re.sub("api\.", "", mod.__name__)
         mod_app = getattr(mod, "app", dict())
-        routes += f"""<li><a href="/{getattr(mod_app, "title", "").capitalize()}/docs">{name.title()}</a> - {getattr(mod_app, "description", "")}</li>"""
+        routes += f"""<li><a href="/{name}/docs">{getattr(mod_app, "title", "").capitalize()}</a> - {getattr(mod_app, "description", "")}</li>"""
     return HTMLResponse(
         content=re.sub(
             r"{{ content }}",
