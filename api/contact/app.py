@@ -28,9 +28,6 @@ app = FastAPI(
     title="Contact List API",
     description="An API for storing contacts.",
     docs_url=None,
-    contact={
-        "email": "info@4geeks.com"
-    },
     openapi_tags=[
         {
             "name": "Agenda operations",

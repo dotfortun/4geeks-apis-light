@@ -23,7 +23,11 @@ for mod in api.__all__:
     if re.search("pycache", mod.__name__):
         continue
     name = re.sub("api\.", "", mod.__name__)
-    app.mount(f"""/{name}""", getattr(mod, "app"), name)
+    subapp: FastAPI = getattr(mod, "app")
+    subapp.contact = {
+        "email": "info@4geeks.com"
+    }
+    app.mount(f"""/{name}""", subapp, name)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

@@ -28,6 +28,16 @@ app = FastAPI(
     title="Todo API",
     description="An API for storing Todo Lists.",
     docs_url=None,
+    openapi_tags=[
+        {
+            "name": "User operations",
+            "description": "Operations on Users.",
+        },
+        {
+            "name": "Todo operations",
+            "description": "Operations on Todos.",
+        }
+    ]
 )
 
 limiter = Limiter(key_func=get_remote_address)
@@ -51,6 +61,8 @@ async def swagger_ui_html():
     status_code=status.HTTP_201_CREATED,
     response_model=TodoUserRead,
     tags=["User operations"],
+    summary="Create User.",
+    description="Creates a new User.",
 )
 @limiter.limit("15/minute")
 def create_user(
@@ -77,6 +89,8 @@ def create_user(
 @app.delete(
     "/users/{user_name}",
     tags=["User operations"],
+    summary="Delete User.",
+    description="Deletes a User from the database.",
 )
 @limiter.limit("15/minute")
 def delete_user(
