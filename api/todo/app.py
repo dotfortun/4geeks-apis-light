@@ -99,7 +99,6 @@ def delete_user(
     request: Request,
     user_name: Annotated[str, Path(title="username")],
     session: Session = Depends(get_session),
-    tags=["User operations"],
 ):
     user = session.exec(select(TodoUser).where(
         TodoUser.name == user_name)
