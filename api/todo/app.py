@@ -7,6 +7,7 @@ from fastapi import (
     Query, Depends, Path, status,
 )
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.middleware.cors import CORSMiddleware
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -38,6 +39,11 @@ app = FastAPI(
             "description": "Operations on Todos.",
         }
     ]
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
 )
 
 limiter = Limiter(key_func=get_remote_address)
@@ -97,7 +103,6 @@ def delete_user(
     request: Request,
     user_name: Annotated[str, Path(title="username")],
     session: Session = Depends(get_session),
-    tags=["User operations"],
 ):
     user = session.exec(select(TodoUser).where(
         TodoUser.name == user_name)
