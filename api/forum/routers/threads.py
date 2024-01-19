@@ -15,7 +15,11 @@ from sqlmodel import (
 )
 
 from api.forum.models import (
+    ForumThread,
     ForumUser,
+    ThreadCreate,
+    ThreadList,
+    ThreadRead,
     UserCreate, UserRead, UserUpdate, UserList
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
@@ -24,8 +28,8 @@ from api.db import get_session
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = APIRouter(
-    prefix="/users",
-    tags=["Users"],
+    prefix="/threads",
+    tags=["Threads"],
 )
 
 
@@ -36,34 +40,25 @@ app = APIRouter(
     summary="Create User.",
     description="Creates a new User.",
 )
-def create_user(
-    user: UserCreate,
+def create_thread(
+    thread: ThreadCreate,
+    current_user: Annotated[ForumUser, Depends(get_current_user)],
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
-    user_exists = session.exec(select(ForumUser).where(
-        ForumUser.username == user.username)).first()
-    if user_exists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists."
-        )
-    user.password = pwd_context.hash(user.password)
-    db_user = ForumUser.model_validate(user)
-    session.add(db_user)
+    thread.user_id = current_user.user_id
+    db_thread = ForumThread.model_validate(thread)
+    session.add(db_thread)
     session.commit()
-    session.refresh(db_user)
-    return UserRead(
-        username=db_user.username,
-        email=db_user.email,
-    )
+    session.refresh(db_thread)
+    return db_thread
 
 
 @app.get(
     "/",
-    response_model=UserList,
+    response_model=ThreadList,
 )
-def read_users(
+def read_threads(
     request: Request,
     offset: int = 0,
     limit: int = Query(default=100, le=100),
@@ -77,21 +72,17 @@ def read_users(
 
 
 @app.get(
-    "/{user_name}",
-    response_model=UserRead,
+    "/{thread_id}",
+    response_model=ThreadRead,
 )
 def read_user(
-    user_name: Annotated[str, Path(title="username")],
+    thread_id: Annotated[int, Path(title="thread id")],
     request: Request,
     session: Session = Depends(get_session)
 ):
-    db_user = session.exec(
-        select(ForumUser).where(ForumUser.username == user_name)
+    return session.exec(
+        select(ForumThread).where(ForumThread.id == thread_id)
     ).first()
-    return UserRead(
-        username=db_user.username,
-        email=db_user.email,
-    )
 
 
 @app.put(

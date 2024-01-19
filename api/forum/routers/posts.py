@@ -24,8 +24,8 @@ from api.db import get_session
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = APIRouter(
-    prefix="/users",
-    tags=["Users"],
+    prefix="/posts",
+    tags=["Posts"],
 )
 
 
@@ -53,10 +53,7 @@ def create_user(
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return UserRead(
-        username=db_user.username,
-        email=db_user.email,
-    )
+    return db_user
 
 
 @app.get(
@@ -78,20 +75,18 @@ def read_users(
 
 @app.get(
     "/{user_name}",
-    response_model=UserRead,
+    response_model=UserList,
 )
 def read_user(
     user_name: Annotated[str, Path(title="username")],
     request: Request,
     session: Session = Depends(get_session)
 ):
-    db_user = session.exec(
-        select(ForumUser).where(ForumUser.username == user_name)
-    ).first()
-    return UserRead(
-        username=db_user.username,
-        email=db_user.email,
-    )
+    return {
+        "users": session.exec(
+            select(ForumUser).where(ForumUser.username == user_name)
+        ).all()
+    }
 
 
 @app.put(

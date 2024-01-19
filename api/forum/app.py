@@ -22,6 +22,8 @@ from api.forum.models import (
 )
 from api.forum.routers.auth import app as auth
 from api.forum.routers.users import app as users
+from api.forum.routers.threads import app as threads
+from api.forum.routers.posts import app as posts
 from api.db import get_session
 
 app = FastAPI(
@@ -38,6 +40,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Routers
 app.include_router(auth)
 app.include_router(users)
+app.include_router(threads)
+app.include_router(posts)
 
 
 @app.get("/docs", include_in_schema=False)
