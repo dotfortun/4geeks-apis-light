@@ -26,7 +26,7 @@ from api.db import get_session
 
 app = FastAPI(
     title="Forum API",
-    description="An API that you should describe.",
+    description="A more advanced API with Oauth2.",
     docs_url=None,
 )
 
