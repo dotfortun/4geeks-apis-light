@@ -1,3 +1,5 @@
+import os
+
 from typing import List, Optional, Annotated
 
 from fastapi import (
@@ -11,12 +13,15 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from sqlmodel import (
-    Session, select
+    Session, select,
 )
 
 from api.forum.models import (
-    HelloWorldRead
+    ForumUser,
+    UserCreate, UserRead, UserUpdate, UserList
 )
+from api.forum.routers.auth import app as auth
+from api.forum.routers.users import app as users
 from api.db import get_session
 
 app = FastAPI(
@@ -30,6 +35,10 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Routers
+app.include_router(auth)
+app.include_router(users)
+
 
 @app.get("/docs", include_in_schema=False)
 async def swagger_ui_html():
@@ -38,18 +47,3 @@ async def swagger_ui_html():
         openapi_url="/forum/openapi.json",
         swagger_favicon_url="/favicon.ico",
     )
-
-
-@app.get(
-    "/hello/",
-    response_model=HelloWorldRead,
-    tags=["User operations"],
-)
-@limiter.limit("15/minute")
-def hello_world(
-    request: Request,
-    session: Session = Depends(get_session)
-) -> None:
-    hello_world = HelloWorldRead(message="Hello, world!")
-    return hello_world
-
