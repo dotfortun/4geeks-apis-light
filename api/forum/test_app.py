@@ -1,12 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import (
-    Session, SQLModel, create_engine
+    Session, SQLModel, create_engine, select
 )
 from sqlalchemy.pool import StaticPool
 
 from api.db import get_session
 from api.forum.app import app
+from api.forum.models import ForumUser
+from api.forum.routers.auth import get_password_hash
 
 
 @pytest.fixture(name="session")
@@ -30,12 +32,50 @@ def client_fixture(session: Session):
     app.dependency_overrides.clear()
 
 
-def test_hello_world(client: TestClient):
-    response = client.get(
-        "/hello"
+def test_get_users(session: Session, client: TestClient):
+    from api.forum.routers.auth import get_password_hash
+    users = [
+        ForumUser(
+            username="grizelle",
+            email="grizelle@catemail.com",
+            password=get_password_hash("blackhairties")
+        ),
+        ForumUser(
+            username="sombra",
+            email="sombra@catemail.com",
+            password=get_password_hash("littleblueparrot")
+        ),
+    ]
+    for user in users:
+        session.add(user)
+    session.commit()
+
+    resp = client.get(
+        "/users"
     )
-    data = response.json()
+    data = resp.json()
 
-    assert response.status_code == 200
-    assert data["message"] == "Hello, world!"
+    assert resp.status_code == 200
+    assert isinstance(data["users"], list)
+    assert len(data["users"]) == 2
+    assert "grizelle" in [user["username"] for user in data["users"]]
+    assert "sombra" in [user["username"] for user in data["users"]]
 
+
+def test_create_users(session: Session, client: TestClient):
+    resp = client.post(
+        "/users",
+        json={
+            "username": "sombra",
+            "email": "sombra@catemail.com",
+            "password": "littleblueparrot"
+        }
+    )
+    data = resp.json()
+
+    sombra = session.exec(select(ForumUser)).first()
+
+    assert resp.status_code == 201
+    assert sombra.username == "sombra"
+    assert sombra.email == "sombra@catemail.com"
+    assert sombra.password != "littleblueparrot"

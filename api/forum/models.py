@@ -32,7 +32,14 @@ class ForumUser(UserBase, table=True):
     password: str = Field(
         nullable=False
     )
-    threads: Optional["ForumThread"] = Relationship(back_populates="user")
+    posts: Optional["ForumPost"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "delete"}
+    )
+    threads: Optional["ForumThread"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "delete"}
+    )
 
 
 class UserCreate(UserBase):
@@ -79,6 +86,10 @@ class ForumThread(ThreadBase, table=True):
         foreign_key="forumuser.id"
     )
     user: Optional["ForumUser"] = Relationship(back_populates="threads")
+    posts: Optional["ForumPost"] = Relationship(
+        back_populates="thread",
+        sa_relationship_kwargs={"cascade": "delete"}
+    )
 
 
 class ThreadCreate(ThreadBase):
@@ -86,7 +97,9 @@ class ThreadCreate(ThreadBase):
 
 
 class ThreadRead(ThreadBase):
-    posts: List["PostRead"]
+    id: int
+    user: UserRead
+    posts: Optional[List["PostRead"]] = None
 
 
 class ThreadUpdate(ThreadBase):
@@ -114,13 +127,17 @@ class ForumPost(PostBase, table=True):
     )
     content: str
     thread_id: int = Field(
-        foreign_key="forumuser.id"
+        foreign_key="forumthread.id"
     )
-    thread: Optional["ForumThread"] = Relationship(back_populates="posts")
+    thread: Optional["ForumThread"] = Relationship(
+        back_populates="posts"
+    )
     user_id: int = Field(
         foreign_key="forumuser.id"
     )
-    user: Optional["ForumUser"] = Relationship(back_populates="posts")
+    user: Optional["ForumUser"] = Relationship(
+        back_populates="posts"
+    )
     created: datetime = Field(
         default=datetime.utcnow(),
         nullable=False
@@ -136,6 +153,10 @@ class PostCreate(PostBase):
 
 
 class PostRead(PostBase):
+    id: int
+
+
+class PostsRead(PostBase):
     id: int
 
 
@@ -176,6 +197,23 @@ class ThreadList(BaseModel):
 
 
 class PostList(BaseModel):
-    posts: List[PostRead]
+    posts: List[PostsRead]
+
 
 # endregion: List Models
+
+
+# region: Models with annoying relationships
+
+
+class UserReadDetails(UserBase):
+    posts: Optional["PostRead"]
+    threads: Optional["ThreadRead"]
+
+
+class UserReadDetails(UserBase):
+    posts: List["PostRead"]
+    threads: List["ThreadRead"]
+
+
+#  endregion: Models with annoying relationships

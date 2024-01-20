@@ -16,7 +16,8 @@ from sqlmodel import (
 
 from api.forum.models import (
     ForumUser,
-    UserCreate, UserRead, UserUpdate, UserList
+    UserCreate, UserRead,
+    UserReadDetails, UserUpdate, UserList
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
 from api.db import get_session
@@ -32,7 +33,7 @@ app = APIRouter(
 @app.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=UserRead,
+    response_model=UserReadDetails,
     summary="Create User.",
     description="Creates a new User.",
 )
@@ -53,9 +54,11 @@ def create_user(
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return UserRead(
+    return UserReadDetails(
         username=db_user.username,
         email=db_user.email,
+        posts=db_user.posts or [],
+        threads=db_user.threads or [],
     )
 
 
@@ -78,7 +81,7 @@ def read_users(
 
 @app.get(
     "/{user_name}",
-    response_model=UserRead,
+    response_model=UserReadDetails,
 )
 def read_user(
     user_name: Annotated[str, Path(title="username")],
@@ -88,9 +91,11 @@ def read_user(
     db_user = session.exec(
         select(ForumUser).where(ForumUser.username == user_name)
     ).first()
-    return UserRead(
+    return UserReadDetails(
         username=db_user.username,
         email=db_user.email,
+        threads=db_user.threads or [],
+        posts=db_user.posts or [],
     )
 
 

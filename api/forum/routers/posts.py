@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 import os
 
 from typing import List, Optional, Annotated
@@ -13,10 +14,16 @@ from passlib.context import CryptContext
 from sqlmodel import (
     Session, select,
 )
+from api import db
 
 from api.forum.models import (
+    ForumPost,
+    ForumThread,
     ForumUser,
-    UserCreate, UserRead, UserUpdate, UserList
+    PostCreate,
+    PostList,
+    PostRead,
+    PostUpdate,
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
 from api.db import get_session
@@ -30,108 +37,121 @@ app = APIRouter(
 
 
 @app.post(
-    "/",
+    "/replyto/{thread_id}",
     status_code=status.HTTP_201_CREATED,
-    response_model=UserRead,
-    summary="Create User.",
-    description="Creates a new User.",
+    response_model=PostRead,
 )
-def create_user(
-    user: UserCreate,
+def reply_to_thread(
+    thread_id: Annotated[int, Path(title="thread id")],
+    post: PostCreate,
+    current_user: Annotated[ForumUser, Depends(get_current_user)],
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
-    user_exists = session.exec(select(ForumUser).where(
-        ForumUser.username == user.username)).first()
-    if user_exists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists."
-        )
-    user.password = pwd_context.hash(user.password)
-    db_user = ForumUser.model_validate(user)
-    session.add(db_user)
+    db_post = ForumPost.model_validate({
+        **post.model_dump(),
+        "user_id": current_user.id,
+        "thread_id": thread_id,
+    })
+    session.add(db_post)
     session.commit()
-    session.refresh(db_user)
-    return db_user
+    session.refresh(db_post)
+    return db_post
 
 
 @app.get(
     "/",
-    response_model=UserList,
+    response_model=PostList,
 )
-def read_users(
+def read_posts(
     request: Request,
     offset: int = 0,
     limit: int = Query(default=100, le=100),
     session: Session = Depends(get_session)
 ):
     return {
-        "users": session.exec(
-            select(ForumUser).offset(offset).limit(limit)
+        "posts": session.exec(
+            select(ForumThread).offset(offset).limit(limit)
         ).all()
     }
 
 
 @app.get(
-    "/{user_name}",
-    response_model=UserList,
+    "/{post_id}",
+    response_model=PostRead,
 )
-def read_user(
-    user_name: Annotated[str, Path(title="username")],
+def get_single_post(
+    post_id: Annotated[int, Path(title="thread id")],
     request: Request,
     session: Session = Depends(get_session)
 ):
-    return {
-        "users": session.exec(
-            select(ForumUser).where(ForumUser.username == user_name)
-        ).all()
-    }
+    db_thread = session.exec(
+        select(ForumPost).where(ForumPost.id == post_id)
+    ).first()
+    if not db_thread:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Thread #{post_id} doesn't exist."
+        )
+    return db_thread
 
 
 @app.put(
-    "/",
-    response_model=UserRead,
+    "/{post_id}",
+    response_model=PostRead,
 )
-def update_user(
+def update_post(
+    post_id: Annotated[int, Path(title="thread id")],
     request: Request,
-    user_data: UserUpdate,
+    post_data: PostUpdate,
     current_user: Annotated[ForumUser, Depends(get_current_user)],
     session: Session = Depends(get_session)
 ):
-    if not current_user:
+    db_post = session.exec(
+        select(ForumPost).where(ForumPost.id == post_id)
+    ).first()
+    if not db_post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User doesn't exist."
+            detail=f"Thread #{post_id} doesn't exist."
         )
-    for k, v in user_data:
-        if k == "password" and v is not None:
-            setattr(current_user, k, get_password_hash(v))
-            continue
+    if db_post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"You lack the permissions to edit this thread."
+        )
+    for k, v in post_data:
         if v is not None:
-            setattr(current_user, k, v)
-    session.add(current_user)
+            setattr(db_post, k, v)
+    session.add(db_post)
     session.commit()
-    session.refresh(current_user)
-    return current_user
+    session.refresh(db_post)
+    return db_post
 
 
 @app.delete(
-    "/{user_id}",
+    "/{post_id}",
 )
-def delete_user(
+def delete_post(
     request: Request,
-    user_id: Annotated[int, Path(title="todo id")],
+    post_id: Annotated[int, Path(title="todo id")],
     current_user: Annotated[ForumUser, Depends(get_current_user)],
     session: Session = Depends(get_session)
 ):
-    user = session.get(ForumUser, user_id)
-    if not all([user, current_user.id == user_id]):
+    db_post = session.exec(
+        select(ForumPost).where(ForumPost.id == post_id)
+    ).first()
+    if not db_post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User #{user_id} doesn't exist."
+            detail=f"Thread #{post_id} doesn't exist."
         )
-    session.delete(user)
+    if db_post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"You lack the permissions to delete this thread."
+        )
+    session.delete(db_post)
     session.commit()
     return Response(
         status_code=status.HTTP_204_NO_CONTENT

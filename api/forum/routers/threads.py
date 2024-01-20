@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 import os
 
 from typing import List, Optional, Annotated
@@ -13,6 +14,7 @@ from passlib.context import CryptContext
 from sqlmodel import (
     Session, select,
 )
+from api import db
 
 from api.forum.models import (
     ForumThread,
@@ -20,7 +22,7 @@ from api.forum.models import (
     ThreadCreate,
     ThreadList,
     ThreadRead,
-    UserCreate, UserRead, UserUpdate, UserList
+    ThreadUpdate,
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
 from api.db import get_session
@@ -36,9 +38,7 @@ app = APIRouter(
 @app.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=UserRead,
-    summary="Create User.",
-    description="Creates a new User.",
+    response_model=ThreadRead,
 )
 def create_thread(
     thread: ThreadCreate,
@@ -46,8 +46,10 @@ def create_thread(
     request: Request,
     session: Session = Depends(get_session)
 ) -> None:
-    thread.user_id = current_user.user_id
-    db_thread = ForumThread.model_validate(thread)
+    db_thread = ForumThread.model_validate({
+        **thread.model_dump(),
+        "user_id": current_user.id,
+    })
     session.add(db_thread)
     session.commit()
     session.refresh(db_thread)
@@ -65,8 +67,8 @@ def read_threads(
     session: Session = Depends(get_session)
 ):
     return {
-        "users": session.exec(
-            select(ForumUser).offset(offset).limit(limit)
+        "threads": session.exec(
+            select(ForumThread).offset(offset).limit(limit)
         ).all()
     }
 
@@ -75,59 +77,78 @@ def read_threads(
     "/{thread_id}",
     response_model=ThreadRead,
 )
-def read_user(
+def read_thread(
     thread_id: Annotated[int, Path(title="thread id")],
     request: Request,
     session: Session = Depends(get_session)
 ):
-    return session.exec(
+    db_thread = session.exec(
         select(ForumThread).where(ForumThread.id == thread_id)
     ).first()
+    if not db_thread:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Thread #{thread_id} doesn't exist."
+        )
+    return db_thread
 
 
 @app.put(
-    "/",
-    response_model=UserRead,
+    "/{thread_id}",
+    response_model=ThreadRead,
 )
-def update_user(
+def update_thread(
+    thread_id: Annotated[int, Path(title="thread id")],
     request: Request,
-    user_data: UserUpdate,
+    thread_data: ThreadUpdate,
     current_user: Annotated[ForumUser, Depends(get_current_user)],
     session: Session = Depends(get_session)
 ):
-    if not current_user:
+    db_thread = session.exec(
+        select(ForumThread).where(ForumThread.id == thread_id)
+    ).first()
+    if not db_thread:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User doesn't exist."
+            detail=f"Thread #{thread_id} doesn't exist."
         )
-    for k, v in user_data:
-        if k == "password" and v is not None:
-            setattr(current_user, k, get_password_hash(v))
-            continue
+    if db_thread.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"You lack the permissions to edit this thread."
+        )
+    for k, v in thread_data:
         if v is not None:
-            setattr(current_user, k, v)
-    session.add(current_user)
+            setattr(db_thread, k, v)
+    session.add(db_thread)
     session.commit()
-    session.refresh(current_user)
-    return current_user
+    session.refresh(db_thread)
+    return db_thread
 
 
 @app.delete(
-    "/{user_id}",
+    "/{thread_id}",
 )
-def delete_user(
+def delete_thread(
     request: Request,
-    user_id: Annotated[int, Path(title="todo id")],
+    thread_id: Annotated[int, Path(title="todo id")],
     current_user: Annotated[ForumUser, Depends(get_current_user)],
     session: Session = Depends(get_session)
 ):
-    user = session.get(ForumUser, user_id)
-    if not all([user, current_user.id == user_id]):
+    db_thread = session.exec(
+        select(ForumThread).where(ForumThread.id == thread_id)
+    ).first()
+    if not db_thread:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User #{user_id} doesn't exist."
+            detail=f"Thread #{thread_id} doesn't exist."
         )
-    session.delete(user)
+    if db_thread.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"You lack the permissions to delete this thread."
+        )
+    session.delete(db_thread)
     session.commit()
     return Response(
         status_code=status.HTTP_204_NO_CONTENT
