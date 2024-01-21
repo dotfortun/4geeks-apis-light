@@ -16,6 +16,7 @@ from sqlmodel import (
 
 from api.forum.models import (
     ForumUser,
+    PostRead,
     UserCreate, UserRead,
     UserReadDetails, UserUpdate, UserList
 )
@@ -55,10 +56,11 @@ def create_user(
     session.commit()
     session.refresh(db_user)
     return UserReadDetails(
+        id=db_user.id,
         username=db_user.username,
         email=db_user.email,
-        posts=db_user.posts or [],
-        threads=db_user.threads or [],
+        posts=db_user.posts,
+        threads=db_user.threads,
     )
 
 
@@ -92,10 +94,11 @@ def read_user(
         select(ForumUser).where(ForumUser.username == user_name)
     ).first()
     return UserReadDetails(
+        id=db_user.id,
         username=db_user.username,
         email=db_user.email,
-        threads=db_user.threads or [],
-        posts=db_user.posts or [],
+        threads=db_user.threads,
+        posts=db_user.posts,
     )
 
 

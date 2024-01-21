@@ -32,13 +32,17 @@ class ForumUser(UserBase, table=True):
     password: str = Field(
         nullable=False
     )
-    posts: Optional["ForumPost"] = Relationship(
+    posts: List["ForumPost"] = Relationship(
         back_populates="user",
-        sa_relationship_kwargs={"cascade": "delete"}
+        sa_relationship_kwargs={
+            "cascade": "delete"
+        }
     )
-    threads: Optional["ForumThread"] = Relationship(
+    threads: List["ForumThread"] = Relationship(
         back_populates="user",
-        sa_relationship_kwargs={"cascade": "delete"}
+        sa_relationship_kwargs={
+            "cascade": "delete"
+        }
     )
 
 
@@ -49,7 +53,7 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    pass
+    id: int
 
 
 class UserUpdate(UserBase):
@@ -85,8 +89,8 @@ class ForumThread(ThreadBase, table=True):
     user_id: int = Field(
         foreign_key="forumuser.id"
     )
-    user: Optional["ForumUser"] = Relationship(back_populates="threads")
-    posts: Optional["ForumPost"] = Relationship(
+    user: List["ForumUser"] = Relationship(back_populates="threads")
+    posts: List["ForumPost"] = Relationship(
         back_populates="thread",
         sa_relationship_kwargs={"cascade": "delete"}
     )
@@ -207,11 +211,7 @@ class PostList(BaseModel):
 
 
 class UserReadDetails(UserBase):
-    posts: Optional["PostRead"]
-    threads: Optional["ThreadRead"]
-
-
-class UserReadDetails(UserBase):
+    id: Optional[int]
     posts: List["PostRead"]
     threads: List["ThreadRead"]
 
