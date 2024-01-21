@@ -5,14 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python: pytest",
+      "type": "python",
+      "module": "pytest",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "Python: FastAPI",
       "type": "python",
       "request": "launch",
       "module": "uvicorn",
-      "args": [
-        "main:app",
-        "--reload"
-      ],
+      "args": ["main:app", "--reload"],
       "jinja": true,
       "justMyCode": true
     }
