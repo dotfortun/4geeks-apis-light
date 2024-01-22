@@ -22,7 +22,7 @@ pytest = "*"
 httpx = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
 
 [scripts]
 dev="uvicorn main:app --reload"
