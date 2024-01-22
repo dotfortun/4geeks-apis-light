@@ -22,10 +22,11 @@ pytest = "*"
 httpx = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.9"
 
 [scripts]
 dev="uvicorn main:app --reload"
+start="uvicorn main:app"
 test="pytest"
 utils="python utils.py"
 migrate="alembic revision --autogenerate"
