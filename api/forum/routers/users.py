@@ -35,7 +35,7 @@ app = APIRouter(
     "/",
     status_code=status.HTTP_201_CREATED,
     response_model=UserReadDetails,
-    summary="Create User.",
+    summary="Create User",
     description="Creates a new User.",
 )
 def create_user(

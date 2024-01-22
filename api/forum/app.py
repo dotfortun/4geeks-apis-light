@@ -72,8 +72,8 @@ async def scalar_ui_html():
       var apiReference = document.getElementById('api-reference')
       apiReference.dataset.configuration = JSON.stringify(configuration)
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.8.0/dist/browser/standalone.min.js"></script>
-    # <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.13.12/dist/browser/standalone.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@latest/dist/browser/standalone.min.js"></script> -->
+    <script src="/static/scalar.standalone.js"></script>
   </body>
 </html>
 """
