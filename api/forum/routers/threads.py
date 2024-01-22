@@ -22,6 +22,7 @@ from api.forum.models import (
     ThreadCreate,
     ThreadList,
     ThreadRead,
+    ThreadReadDetails,
     ThreadUpdate,
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
@@ -38,7 +39,7 @@ app = APIRouter(
 @app.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=ThreadRead,
+    response_model=ThreadReadDetails,
 )
 def create_thread(
     thread: ThreadCreate,

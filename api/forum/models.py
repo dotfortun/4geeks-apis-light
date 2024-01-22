@@ -1,4 +1,5 @@
 from datetime import datetime
+from token import OP
 from typing import List, Optional
 
 from sqlmodel import (
@@ -87,7 +88,7 @@ class ForumThread(ThreadBase, table=True):
     title: str
     content: str
     user_id: int = Field(
-        foreign_key="forumuser.id"
+        foreign_key="forumuser.id",
     )
     user: List["ForumUser"] = Relationship(back_populates="threads")
     posts: List["ForumPost"] = Relationship(
@@ -103,7 +104,6 @@ class ThreadCreate(ThreadBase):
 class ThreadRead(ThreadBase):
     id: int
     user: UserRead
-    posts: Optional[List["PostRead"]] = None
 
 
 class ThreadUpdate(ThreadBase):
@@ -117,10 +117,6 @@ class ThreadUpdate(ThreadBase):
 # region: Posts
 
 class PostBase(SQLModel):
-    id: Optional[int] = Field(
-        default=None,
-        primary_key=True
-    )
     content: str
 
 
@@ -158,6 +154,8 @@ class PostCreate(PostBase):
 
 class PostRead(PostBase):
     id: int
+    user: UserRead
+    thread: ThreadRead
 
 
 class PostsRead(PostBase):
@@ -214,6 +212,12 @@ class UserReadDetails(UserBase):
     id: Optional[int]
     posts: List["PostRead"]
     threads: List["ThreadRead"]
+
+
+class ThreadReadDetails(ThreadBase):
+    id: Optional[int]
+    user: ForumUser
+    posts: List["PostRead"]
 
 
 #  endregion: Models with annoying relationships

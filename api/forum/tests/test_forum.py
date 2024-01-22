@@ -1,4 +1,5 @@
 from typing import List
+from httpx import head
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import (
@@ -214,16 +215,132 @@ def test_create_threads(session: Session, client: TestClient):
 
 
 def test_update_threads(session: Session, client: TestClient):
-    pass
+    db_users = gen_users(session)
+    db_threads = gen_threads(session, db_users)
+
+    resp = client.put(
+        "/threads/1",
+        json={
+            "title": "A post that a cat would make.",
+            "content": "You know, a post about cat stuff."
+        }
+    )
+    data = resp.json()
+
+    db_thread = session.get(ForumThread, 1)
+
+    assert resp.status_code == 401
+    assert db_thread.title != "A post that a cat would make."
+    assert db_thread.content != "You know, a post about cat stuff."
+
+    headers = get_auth_header(client, "grizelle", "blackhairties")
+    resp = client.put(
+        "/threads/1",
+        headers=headers,
+        json={
+            "title": "A post that a cat would make.",
+            "content": "You know, a post about cat stuff."
+        }
+    )
+    data = resp.json()
+
+    db_thread = session.get(ForumThread, 1)
+
+    assert resp.status_code == 200
+    assert db_thread.title == "A post that a cat would make."
+    assert db_thread.content == "You know, a post about cat stuff."
 
 
 def test_read_posts(session: Session, client: TestClient):
-    db_posts = gen_posts(session, gen_users(session))
+    db_users = gen_users(session)
+    db_threads = gen_threads(session, db_users)
+    db_posts = gen_posts(session, db_threads)
+
+    resp = client.get("/posts")
+    data = resp.json()
+
+    assert resp.status_code == 200
+    assert len(db_posts) == len(data["posts"])
+
+    resp = client.get("/posts/1")
+    data = resp.json()
+
+    assert resp.status_code == 200
+    assert data["content"] == "A reply about cat business"
 
 
 def test_create_posts(session: Session, client: TestClient):
-    pass
+    db_users = gen_users(session)
+    db_threads = gen_threads(session, db_users)
+
+    resp = client.post(
+        "/posts/replyto/1",
+        json={
+            "content": "This is totally a comment a cat would make."
+        }
+    )
+    data = resp.json()
+
+    assert resp.status_code == 401
+
+    headers = get_auth_header(client, "sombra", "littleblueparrot")
+    resp = client.post(
+        "/posts/replyto/1",
+        headers=headers,
+        json={
+            "invalid": "json body"
+        }
+    )
+    data = resp.json()
+
+    assert resp.status_code == 422
+
+    headers = get_auth_header(client, "sombra", "littleblueparrot")
+    resp = client.post(
+        "/posts/replyto/1",
+        headers=headers,
+        json={
+            "content": "This is totally a comment a cat would make."
+        }
+    )
+    data = resp.json()
+
+    assert resp.status_code == 201
+    assert data["content"] == "This is totally a comment a cat would make."
+    assert data["user"]["username"] == "sombra"
+    assert data["thread"]["id"] == 1
 
 
 def test_update_posts(session: Session, client: TestClient):
-    pass
+    db_users = gen_users(session)
+    db_threads = gen_threads(session, db_users)
+    db_posts = gen_posts(session, db_threads)
+
+    resp = client.put(
+        "/posts/3",
+        json={
+            "content": "Have you tried meowing at your person?"
+        }
+    )
+    data = resp.json()
+
+    db_thread = session.get(ForumPost, 3)
+
+    assert resp.status_code == 401
+    assert db_thread.content != "Have you tried meowing at your person?"
+
+    headers = get_auth_header(client, "nekobasu", "greendragonstuffy")
+    resp = client.put(
+        "/posts/3",
+        headers=headers,
+        json={
+            "content": "Have you tried meowing at your person?"
+        }
+    )
+    data = resp.json()
+
+    db_thread = session.get(ForumPost, 3)
+
+    assert resp.status_code == 200
+    assert data["content"] == "Have you tried meowing at your person?"
+    assert db_thread.content == "Have you tried meowing at your person?"

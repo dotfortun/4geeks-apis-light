@@ -142,6 +142,7 @@ def test_delete(session: Session, client: TestClient):
                 assert db_user is None
                 assert len(db_threads) == thread_count - 1
                 assert len(db_posts) == post_count - 1
+
             case "sombra":
                 # Test deleting ForumThreads
                 # Count threads and posts before starting
@@ -173,6 +174,7 @@ def test_delete(session: Session, client: TestClient):
                 assert db_user is not None
                 assert len(db_threads) == thread_count - 1
                 assert len(db_posts) == post_count - 1
+
             case "nekobasu":
                 # Test deleting ForumPosts
                 # Count threads and posts before starting
@@ -204,6 +206,7 @@ def test_delete(session: Session, client: TestClient):
                 assert db_user is not None
                 assert len(db_threads) == thread_count
                 assert len(db_posts) == post_count - 1
+
             case _:
                 """
                 You really shouldn't be here, but here's
