@@ -54,6 +54,10 @@ To make a new api for the playground, run `pipenv run utils create <module name>
   pipenv run test
 ```
 
+## Env Vars
+
+`DB_URL`: Database connection string, defaults to `sqlite:///./playground.sqlite`
+
 ## Acknowledgements
 
 Thanks to [readme.so](https://readme.so) for this template.
