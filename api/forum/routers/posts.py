@@ -23,6 +23,7 @@ from api.forum.models import (
     PostCreate,
     PostList,
     PostRead,
+    PostReadDetails,
     PostUpdate,
 )
 from api.forum.routers.auth import get_current_user, get_password_hash
@@ -78,7 +79,7 @@ def read_posts(
 
 @app.get(
     "/{post_id}",
-    response_model=PostRead,
+    response_model=PostReadDetails,
 )
 def get_single_post(
     post_id: Annotated[int, Path(title="thread id")],

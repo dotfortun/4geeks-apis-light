@@ -157,6 +157,13 @@ class PostCreate(PostBase):
 class PostRead(PostBase):
     id: int
     user: UserRead
+    created: datetime
+    updated: datetime
+
+
+class PostReadDetails(PostBase):
+    id: int
+    user: UserRead
     thread: ThreadRead
     created: datetime
     updated: datetime
