@@ -118,6 +118,7 @@ def test_get_users(session: Session, client: TestClient):
     assert len(data["users"]) == len(db_users)
     assert "grizelle" in [user["username"] for user in data["users"]]
     assert "sombra" in [user["username"] for user in data["users"]]
+    assert "password" not in data["users"][0].keys()
 
     resp = client.get(
         "/users/sombra"
@@ -130,6 +131,7 @@ def test_get_users(session: Session, client: TestClient):
     assert data["email"] == "sombra@catemail.com"
     assert data["posts"] == []
     assert data["threads"] == []
+    assert "password" not in data.keys()
 
 
 def test_create_users(session: Session, client: TestClient):
@@ -149,6 +151,7 @@ def test_create_users(session: Session, client: TestClient):
     assert sombra.username == "sombra"
     assert sombra.email == "sombra@catemail.com"
     assert sombra.password != "littleblueparrot"
+    assert "password" not in data.keys()
 
 
 def test_read_threads(session: Session, client: TestClient):
