@@ -76,7 +76,7 @@ def read_threads(
 
 @app.get(
     "/{thread_id}",
-    response_model=ThreadRead,
+    response_model=ThreadReadDetails,
 )
 def read_thread(
     thread_id: Annotated[int, Path(title="thread id")],

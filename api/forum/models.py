@@ -104,6 +104,8 @@ class ThreadCreate(ThreadBase):
 class ThreadRead(ThreadBase):
     id: int
     user: UserRead
+    created: datetime
+    updated: datetime
 
 
 class ThreadUpdate(ThreadBase):
@@ -156,6 +158,8 @@ class PostRead(PostBase):
     id: int
     user: UserRead
     thread: ThreadRead
+    created: datetime
+    updated: datetime
 
 
 class PostsRead(PostBase):
@@ -216,8 +220,10 @@ class UserReadDetails(UserBase):
 
 class ThreadReadDetails(ThreadBase):
     id: Optional[int]
-    user: ForumUser
+    user: UserRead
     posts: List["PostRead"]
+    created: datetime
+    updated: datetime
 
 
 #  endregion: Models with annoying relationships
