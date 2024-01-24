@@ -76,5 +76,4 @@ async def scalar_ui_html():
     <!-- <script src="/static/scalar.standalone.js"></script> -->
   </body>
 </html>
-"""
-    )
+""")

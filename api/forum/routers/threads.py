@@ -39,7 +39,7 @@ app = APIRouter(
 @app.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=ThreadReadDetails,
+    response_model=ThreadRead,
 )
 def create_thread(
     thread: ThreadCreate,
