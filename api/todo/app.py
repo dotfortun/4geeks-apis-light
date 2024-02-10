@@ -1,4 +1,6 @@
-import os
+import re
+
+import markdown
 
 from typing import List, Optional, Annotated
 
@@ -7,6 +9,7 @@ from fastapi import (
     Query, Depends, Path, status,
 )
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import HTMLResponse
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -44,6 +47,31 @@ limiter = Limiter(key_func=get_remote_address)
 # Limiter requires the request to be in the args for your routes!
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.get('/')
+def readme():
+    template = None
+    md = None
+    with (
+        open("static/template.html", "rt") as template_file,
+        open("api/todo/README.md", "rt") as md_file
+    ):
+        template = template_file.read()
+        md = md_file.read()
+    template = re.sub(r"{{ title }}", "Todo API", template)
+    template = re.sub(
+        r"{{ content }}",
+        markdown.markdown(
+            md,
+            extensions=["toc"]
+        ),
+        template
+    )
+
+    return HTMLResponse(
+        content=template
+    )
 
 
 @app.get("/docs", include_in_schema=False)

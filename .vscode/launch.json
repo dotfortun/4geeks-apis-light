@@ -6,13 +6,10 @@
   "configurations": [
     {
       "name": "Python: FastAPI",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "args": [
-        "main:app",
-        "--reload"
-      ],
+      "args": ["main:app", "--reload"],
       "jinja": true,
       "justMyCode": true
     }

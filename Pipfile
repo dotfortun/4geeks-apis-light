@@ -10,6 +10,7 @@ slowapi = "0.1.8"
 sqlalchemy = "2.0.24"
 alembic = "1.13.1"
 sqlmodel = "0.0.14"
+markdown = "*"
 
 [dev-packages]
 pipenv = "*"
