@@ -1,5 +1,6 @@
-
 # 4Geeks Playground APIs
+
+[![Tests](https://github.com/dotfortun/4geeks-apis-light/actions/workflows/python-app.yml/badge.svg)](https://github.com/dotfortun/4geeks-apis-light/actions/workflows/python-app.yml)
 
 Resources for Teachers and Students using the [BreatheCode Platform](https://breatheco.de).
 
