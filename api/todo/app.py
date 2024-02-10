@@ -55,7 +55,7 @@ def readme():
     md = None
     with (
         open("./static/template.html", "rt") as template_file,
-        open("./api/todo/README.md", "rt") as md_file
+        open("./README.md", "rt") as md_file
     ):
         template = template_file.read()
         md = md_file.read()
