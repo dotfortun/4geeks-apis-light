@@ -64,7 +64,10 @@ def readme():
         r"{{ content }}",
         markdown.markdown(
             md,
-            extensions=["toc"]
+            extensions=[
+                "toc",
+                "fenced_code",
+            ]
         ),
         template
     )
