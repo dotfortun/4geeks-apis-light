@@ -11,6 +11,7 @@ This API is used for storing `Todo` objects that are owned by a `User`.
 #### `GET /users`
 This endpoint gives you a list of `User` objects that are currently stored in the database.
 The response body will look something like this:
+
 ```json
 {
   "users": [
@@ -29,6 +30,7 @@ The response body will look something like this:
 #### `POST /users/{username}`
 This endpoint creates a new `User` and then returns a `User` object.
 So if you make a `POST` request to `/users/some_new_user`, the response body will look something like this:
+
 ```json
 {
   "name": "some_new_user",
@@ -39,6 +41,7 @@ So if you make a `POST` request to `/users/some_new_user`, the response body wil
 #### `GET /users/{username}`
 This endpoint gives you a `User` and a list of their `Todo` objects.
 So if you make a `GET` request to `/users/some_new_user`, the response body will look something like this:
+
 ```json
 {
   "name": "some_new_user",
@@ -59,6 +62,7 @@ This endpoint will return an empty response with the status code `204` if it is 
 #### `POST /todos/{username}`
 This endpoint creates a new `Todo` and then returns that `Todo` object.
 So if you make a `POST` request to `/todos/some_new_user` with the following JSON payload:
+
 ```json
 {
   "label": "Make another new todo item!",
@@ -67,6 +71,7 @@ So if you make a `POST` request to `/todos/some_new_user` with the following JSO
 ```
 
 The response body will look something like this:
+
 ```json
 {
   "label": "Make another new todo item!",
@@ -78,6 +83,7 @@ The response body will look something like this:
 #### `PUT /todos/{todo_id}`
 This endpoint allows you to edit a specific `Todo` object.
 So if you make a `PUT` request to `/todos/2` with the following JSON payload:
+
 ```json
 {
   "label": "Make another new todo item!",
@@ -86,6 +92,7 @@ So if you make a `PUT` request to `/todos/2` with the following JSON payload:
 ```
 
 The response body will look something like this:
+
 ```json
 {
   "label": "Make another new todo item!",
