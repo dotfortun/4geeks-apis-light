@@ -17,10 +17,19 @@
 <body>
   <style>
     pre {
-      background: hsla(0, 0%, 0%, 0.5);
-      padding: 1rem;
-      border-radius: 1rem;
       width: 100%;
+    }
+
+    h1:has(code),
+    h2:has(code),
+    h3:has(code),
+    h4:has(code),
+    h5:has(code),
+    h6:has(code),
+    pre {
+      background: hsla(0, 0%, 0%, calc(1/3));
+      padding: 0.5rem;
+      border-radius: 0.5rem;
     }
   </style>
 
