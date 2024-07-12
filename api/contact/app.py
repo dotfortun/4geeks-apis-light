@@ -190,6 +190,30 @@ def read_agenda_contacts(
     )
 
 
+@app.get(
+    "/agendas/{slug}/contacts/{id}",
+    response_model=ContactRead,
+    tags=["Contact operations"],
+    summary="Get Single Agenda Contact.",
+    description="Gets a specific contact from the agenda.",
+)
+@limiter.limit("60/minute")
+def read_agenda_contact(
+    request: Request,
+    slug: Annotated[str, Path(title="slug")],
+    id: Annotated[int, Path(title="id")],
+    session: Session = Depends(get_session)
+):
+    contact = session.exec(select(Contact).where(
+        Contact.id == id and Contact.agenda.slug == slug)).first()
+    if not contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"""Contact "{id}" doesn't exist."""
+        )
+    return contact
+
+
 @app.post(
     "/agendas/{slug}/contacts",
     response_model=ContactRead,
